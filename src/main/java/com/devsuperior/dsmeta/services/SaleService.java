@@ -5,13 +5,15 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
 
-import com.devsuperior.dsmeta.projections.SalesAndSellersProjection;
+import com.devsuperior.dsmeta.dto.SaleMinDTO;
+import com.devsuperior.dsmeta.dto.SaleSummaryDTO;
+import com.devsuperior.dsmeta.projections.SalesReportProjection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.devsuperior.dsmeta.dto.SaleMinDTO;
+import com.devsuperior.dsmeta.dto.SaleReportDTO;
 import com.devsuperior.dsmeta.entities.Sale;
 import com.devsuperior.dsmeta.repositories.SaleRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +31,7 @@ public class SaleService {
 	}
 
 	@Transactional
-	public Page<SaleMinDTO> salesReport(String minDateStr, String maxDateStr, String name, Pageable pageable) {
+	public Page<SaleReportDTO> salesReport(String minDateStr, String maxDateStr, String name, Pageable pageable) {
 
 		/*	Por algum motivo, o banco H2 não aceita a conversão de LocalDate para DATE. A solução foi enviar as datas como String e fazer o CAST dentro da própria query  */
 
@@ -39,7 +41,18 @@ public class SaleService {
 		String minDate = minDateStr.isEmpty() ?
 				LocalDate.parse(maxDate).minusYears(1L).toString() : minDateStr;
 
-		Page<SalesAndSellersProjection> resultSet = repository.reportSearch(minDate, maxDate, name, pageable);
-		return resultSet.map(SaleMinDTO::new);
+		Page<SalesReportProjection> resultSet = repository.reportSearch(minDate, maxDate, name, pageable);
+		return resultSet.map(SaleReportDTO::new);
+	}
+
+	@Transactional
+	public Page<SaleSummaryDTO> salesSummary(String minDateStr, String maxDateStr, Pageable pageable) {
+		String maxDate = maxDateStr.isEmpty() ?
+				LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault()).toString() : maxDateStr;
+
+		String minDate = minDateStr.isEmpty() ?
+				LocalDate.parse(maxDate).minusYears(1L).toString() : minDateStr;
+
+		return repository.summarySearch(minDate, maxDate, pageable).map(SaleSummaryDTO::new);
 	}
 }
