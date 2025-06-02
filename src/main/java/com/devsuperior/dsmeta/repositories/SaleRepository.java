@@ -15,6 +15,12 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
                                         "FROM TB_SALES  ss " +
                                         "INNER JOIN TB_SELLER sll ON ss.seller_id = sll.id " +
                                         "WHERE ss.date BETWEEN CAST(:minDate AS DATE) AND CAST(:maxDate AS DATE) " +
+                                        "AND UPPER(sll.name) LIKE UPPER(CONCAT('%', :name, '%'))",
+
+                           countQuery = "SELECT COUNT(*) " +
+                                        "FROM TB_SALES  ss " +
+                                        "INNER JOIN TB_SELLER sll ON ss.seller_id = sll.id " +
+                                        "WHERE ss.date BETWEEN CAST(:minDate AS DATE) AND CAST(:maxDate AS DATE) " +
                                         "AND UPPER(sll.name) LIKE UPPER(CONCAT('%', :name, '%'))")
     Page<SalesReportProjection> reportSearch(String minDate, String maxDate, String name, Pageable pageable);
 
@@ -22,6 +28,12 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
                                        "FROM TB_SALES  ss " +
                                        "INNER JOIN TB_SELLER sll ON ss.seller_id = sll.id " +
                                        "WHERE ss.date BETWEEN CAST(:minDate AS DATE) AND CAST(:maxDate AS DATE) " +
-                                       "GROUP BY sll.name")
+                                       "GROUP BY sll.name",
+
+                          countQuery = "SELECT  COUNT(*) " +
+                                        "FROM TB_SALES  ss " +
+                                        "INNER JOIN TB_SELLER sll ON ss.seller_id = sll.id " +
+                                        "WHERE ss.date BETWEEN CAST(:minDate AS DATE) AND CAST(:maxDate AS DATE) " +
+                                        "GROUP BY sll.name")
     Page<SalesSummaryProjection> summarySearch(String minDate, String maxDate, Pageable pageable);
 }
